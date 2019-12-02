@@ -11,20 +11,15 @@ mod tests {
     }
 }
 
-pub fn vector_from_file<T: FromStr>(filename: &str) -> Result<Vec<T>, Box<dyn Error>> {
+pub fn vector_from_file<T>(filename: &str) -> Result<Vec<T>, Box<dyn Error>>
+    where T: FromStr, T::Err: 'static + Error
+{
     let mut v: Vec<T> = Vec::new();
     let file = File::open(filename)?;
     let br = BufReader::new(file);
 
     for line in br.lines() {
-        let n = line?.parse();
-
-        // Not yet sure how to return an error instead of panic
-        let num = match n {
-            Ok(val) => val,
-            Err(_) => panic!("Parse error")
-        };
-
+        let num = line?.parse()?;
         v.push(num);
     }
     return Ok(v)
