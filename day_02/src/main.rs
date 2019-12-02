@@ -42,14 +42,14 @@ fn part_one(original_program: &Vec<usize>) -> usize {
 }
 
 fn part_two(original_program: &Vec<usize>, goal: usize) -> usize {
-    for i in 0..100 {
-        for j in 0..100 {
+    for noun in 0..100 {
+        for verb in 0..100 {
             let mut program = original_program.clone();
-            program[1] = i;
-            program[2] = j;
+            program[1] = noun;
+            program[2] = verb;
             let output = run_program(program);
             if output[0] == goal {
-                return 100 * i + j;
+                return 100 * noun + verb;
             }
         }
     }
@@ -57,12 +57,9 @@ fn part_two(original_program: &Vec<usize>, goal: usize) -> usize {
 }
 
 fn main() {
-    let original_program = aoc::vector_from_comma_separated_file::<usize>("data/input1")
+    let original_program = aoc::vector_from_comma_separated_file::<usize>("data/input")
         .expect("Error getting program");
 
-    let goal = aoc::value_from_file::<usize>("data/input2")
-        .expect("Error getting goal for part two");
-
     println!("Part 1: {}", part_one(&original_program));
-    println!("Part 2: {}", part_two(&original_program, goal));
+    println!("Part 2: {}", part_two(&original_program, 19690720));
 }
