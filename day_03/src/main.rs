@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::cmp;
 use std::fs;
 use std::time;
 
@@ -45,20 +46,25 @@ struct WireSection {
     length: u32
 }
 
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Copy, Clone, Debug)]
 struct Position {
     x: i32,
     y: i32
 }
 
-fn step(x: &mut i32, y: &mut i32, direction: &Direction) -> Position {
-    match direction {
-        Direction::UP => *y += 1,
-        Direction::DOWN => *y -= 1,
-        Direction::LEFT => *x -= 1,
-        Direction::RIGHT => *x += 1
+impl Position {
+    fn step(&mut self, direction: &Direction) {
+        match direction {
+            Direction::UP => self.y += 1,
+            Direction::DOWN => self.y -= 1,
+            Direction::LEFT => self.x -= 1,
+            Direction::RIGHT => self.x += 1
+        }
     }
-    Position{ x:*x, y:*y }
+
+    fn manhattan(&self) -> u32 {
+        self.x.abs() as u32 + self.y.abs() as u32
+    }
 }
 
 fn trace_wires(wire1: &str, wire2: &str) -> (u32, u32) {
@@ -71,43 +77,31 @@ fn trace_wires(wire1: &str, wire2: &str) -> (u32, u32) {
     let w2 = parse_wire_string(wire2);
 
     // Trace the first wire
-    let mut y: i32 = 0;
-    let mut x: i32 = 0;
+    let mut pos = Position{x: 0, y: 0};
     let mut len: u32 = 1;
     for segm in w1 {
-        let mut seglen = segm.length;
-        while seglen > 0 {
-            let pos = step(&mut x, &mut y, &segm.direction);
+        for _ in 0..segm.length {
+            pos.step(&segm.direction);
             h.insert(pos, len);
-            seglen -= 1;
             len += 1;
         }
     }
 
     // Find crossings with second wire
-    let mut y: i32 = 0;
-    let mut x: i32 = 0;
+    let mut pos = Position{x: 0, y: 0};
     let mut len: u32 = 1;
     for segm in w2 {
-        let mut seglen = segm.length;
-        while seglen > 0 {
-            let pos = step(&mut x, &mut y, &segm.direction);
+        for _ in 0..segm.length {
+            pos.step(&segm.direction);
             match h.get(&pos) {
                 Some(w1_len) => {
                     // found crossing with first wire
-                    let delay = w1_len + len;
-                    if delay < minimum_delay {
-                        minimum_delay = delay;
-                    }
-                    let dist = y.abs() as u32 + x.abs() as u32;
-                    if dist < minimum_distance {
-                        minimum_distance = dist;
-                    }
+                    minimum_delay = cmp::min(w1_len + len, minimum_delay);
+                    minimum_distance = cmp::min(pos.manhattan(), minimum_distance);
                 },
                 None => ()
             };
             len += 1;
-            seglen -= 1;
         }
     }
 
