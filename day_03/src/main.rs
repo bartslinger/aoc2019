@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
+use std::time;
 
 #[cfg(test)]
 mod tests {
@@ -138,6 +139,7 @@ fn parse_wire_string(wire: &str) -> Vec<WireSection> {
 }
 
 fn main() {
+    let start = time::Instant::now();
     let contents = fs::read_to_string("data/input").unwrap();
     
     let mut lines = Vec::new();
@@ -148,4 +150,6 @@ fn main() {
     
     println!("Part 1: {}", result.0);
     println!("Part 2: {}", result.1);
+
+    println!("Elapsed: {}ms", start.elapsed().as_millis());
 }
