@@ -6,16 +6,16 @@ mod tests {
 
     #[test]
     fn test_valid_numbers_one() {
-        assert!(valid(111111).0);
-        assert!(!valid(223450).0);
-        assert!(!valid(123789).0);
+        assert!(valid_one(to_byte_vec(111111)));
+        assert!(!valid_one(to_byte_vec(223450)));
+        assert!(!valid_one(to_byte_vec(123789)));
     }
 
     #[test]
     fn test_valid_numbers_two() {
-        assert!(valid(112233).1);
-        assert!(!valid(123444).1);
-        assert!(valid(111122).1);
+        assert!(valid_two(to_byte_vec(112233)));
+        assert!(!valid_two(to_byte_vec(123444)));
+        assert!(valid_two(to_byte_vec(111122)));
     }
 
     #[test]
@@ -27,19 +27,20 @@ mod tests {
     }
 }
 
-fn valid(number: u32) -> (bool, bool) {
+fn to_byte_vec(number: u32) -> Vec<u8> {
     let n = format!("{}", number);
     assert_eq!(6, n.len());
+    n.into_bytes()
+}
 
-    let b = n.as_bytes();
-
+fn valid_one(b: Vec<u8>) -> bool {
     if !(b[5] >= b[4] &&
         b[4] >= b[3] && 
         b[3] >= b[2] &&
         b[2] >= b[1] &&
         b[1] >= b[0])
     {
-        return (false, false);
+        return false;
     }
 
     if b[5] == b[4] ||
@@ -48,13 +49,12 @@ fn valid(number: u32) -> (bool, bool) {
         b[2] == b[1] ||
         b[1] == b[0]
     {
-        return (true, has_double(b));
+        return true;
     }
-
-    return (false, false);
+    false
 }
 
-fn has_double(b: &[u8]) -> bool {
+fn valid_two(b: Vec<u8>) -> bool {
     if b[0] == b[1] && b[1] != b[2] {
         return true;
     }
@@ -73,27 +73,16 @@ fn has_double(b: &[u8]) -> bool {
     false
 }
 
-fn find_valid_options(start: u32, end: u32) -> (u32, u32) {
-
-    // Brute force!
-    let mut cnt = 0;
-    let mut cnt2 = 0;
-    for number in start..=end {
-        let r = valid(number);
-        if r.0 {
-            cnt += 1;
-        }
-        if r.1 {
-            cnt2 += 1;
-        }
-    }
-
-    (cnt,cnt2)
+fn find_valid_options(start: u32, end: u32) -> (usize, usize) {
+    let r: Vec<bool> = (start..=end).map(|x| to_byte_vec(x))
+        .filter(|x| valid_one(x.to_vec()))
+        .map(|x| valid_two(x))
+        .collect();
+    (r.len(), r.iter().filter(|&x| *x).count())
 }
 
 fn main() {
     let contents = fs::read_to_string("data/input").unwrap();
-
     let numbers = contents.trim().split('-').map(|x| x.parse::<u32>().unwrap()).collect::<Vec<_>>();
 
     let answers = find_valid_options(numbers[0], numbers[1]);
