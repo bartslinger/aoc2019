@@ -1,16 +1,11 @@
+pub mod intcode_computer;
+
 use std::error::Error;
 use std::fs;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use std::str::FromStr;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_fails() {
-        assert_ne!(2 + 2, 4);
-    }
-}
 
 pub fn vector_from_file<T>(filename: &str) -> Result<Vec<T>, Box<dyn Error>>
     where T: FromStr, T::Err: 'static + Error
