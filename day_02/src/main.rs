@@ -18,7 +18,7 @@ fn part_one(original_program: &Vec<i64>) -> i64 {
     let mut program = original_program.clone();
     program[1] = 12;
     program[2] = 2;
-    let output = aoc::intcode_computer::program_tick(program);
+    let output = aoc::intcode_computer::run_program(program);
     output[0]
 }
 
@@ -28,7 +28,7 @@ fn part_two(original_program: &Vec<i64>, goal: i64) -> i64 {
             let mut program = original_program.clone();
             program[1] = noun;
             program[2] = verb;
-            let output = aoc::intcode_computer::program_tick(program);
+            let output = aoc::intcode_computer::run_program(program);
             if output[0] == goal {
                 return 100 * noun + verb;
             }
