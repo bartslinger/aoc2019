@@ -85,6 +85,44 @@ pub fn run_program(mut program: Vec<i64>, mut inputs: Vec<i64>, mut outputs: Vec
             4 => {
                 outputs.push(program[program[i+1] as usize]);
                 i += 2;
+            },
+            5 => {
+                let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1));
+                if first_value != 0 {
+                    i = get_value(&program, i+2, get_parameter_mode(instruction, 2)) as usize;
+                } else {
+                    i += 3;
+                }
+            },
+            6 => {
+                let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1));
+                if first_value == 0 {
+                    i = get_value(&program, i+2, get_parameter_mode(instruction, 2)) as usize;
+                } else {
+                    i += 3;
+                }
+            },
+            7 => {
+                let mut_i = program[i+3] as usize;
+                let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1));
+                let second_value = get_value(&program, i+2, get_parameter_mode(instruction, 2));
+                if first_value < second_value {
+                    program[mut_i] = 1;
+                } else {
+                    program[mut_i] = 0;
+                }
+                i += 4;
+            },
+            8 => {
+                let mut_i = program[i+3] as usize;
+                let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1));
+                let second_value = get_value(&program, i+2, get_parameter_mode(instruction, 2));
+                if first_value == second_value {
+                    program[mut_i] = 1;
+                } else {
+                    program[mut_i] = 0;
+                }
+                i += 4;
             }
             99 => break,
             _ => panic!("Invalid opcode")
