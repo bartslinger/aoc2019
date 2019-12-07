@@ -26,7 +26,7 @@ pub fn vector_from_comma_separated_file<T>(filename: &str) -> Result<Vec<T>, Box
     where T: FromStr, T::Err: 'static + Error
 {
     let line = fs::read_to_string(filename)?;
-    let v = line.split(',')
+    let v = line.trim().split(',')
         .map(|x| x.parse::<T>().unwrap())
         .collect();
     
