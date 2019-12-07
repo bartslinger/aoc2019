@@ -51,37 +51,51 @@ fn get_thrust_with_feedback(program: &Vec<i64>, seq: Vec<i64>) -> i64 {
     let mut state_d = clean_state.clone();
     let mut state_e = clean_state.clone();
 
-    // println!("{:?}", state_a);
-
     let mut input_a = 0;
+    let result_a = aoc::intcode_computer::run_program(state_a, vec![seq[0],input_a], vec![]);
+    state_a = result_a.0;
+
+    let result_b = aoc::intcode_computer::run_program(state_b, vec![seq[1],result_a.2[0]], vec![]);
+    state_b = result_b.0;
+    
+    let result_c = aoc::intcode_computer::run_program(state_c, vec![seq[2],result_b.2[0]], vec![]);
+    state_c = result_c.0;
+    
+    let result_d = aoc::intcode_computer::run_program(state_d, vec![seq[3],result_c.2[0]], vec![]);
+    state_d = result_d.0;
+    
+    let result_e = aoc::intcode_computer::run_program(state_e, vec![seq[4],result_d.2[0]], vec![]);
+    state_e = result_e.0;
+    input_a = result_e.2[0];
+
     loop {
-        // println!("input a: {}", input_a);
-        let result_a = aoc::intcode_computer::run_program(state_a, vec![seq[0],input_a], vec![]);
-        state_a = result_a.0;
-
-        let result_b = aoc::intcode_computer::run_program(state_b, vec![seq[1],result_a.2[0]], vec![]);
-        state_b = result_b.0;
-        
-        let result_c = aoc::intcode_computer::run_program(state_c, vec![seq[2],result_b.2[0]], vec![]);
-        state_c = result_c.0;
-        
-        let result_d = aoc::intcode_computer::run_program(state_d, vec![seq[3],result_c.2[0]], vec![]);
-        state_d = result_d.0;
-        
-        let result_e = aoc::intcode_computer::run_program(state_e, vec![seq[4],result_d.2[0]], vec![]);
-        state_e = result_e.0;
-
-        println!("out: {:?} {:?} {:?} {:?} {:?}", result_a.2, result_b.2, result_c.2, result_d.2, result_e.2);
-
-        input_a = result_e.2[0];
 
         if state_a.halted &&
             state_b.halted &&
             state_c.halted &&
             state_d.halted &&
-            state_e.halted {
-                break;
-            }
+            state_e.halted
+        {
+            break;
+        }
+
+        let result_a = aoc::intcode_computer::run_program(state_a, vec![input_a], vec![]);
+        state_a = result_a.0;
+
+        let result_b = aoc::intcode_computer::run_program(state_b, vec![result_a.2[0]], vec![]);
+        state_b = result_b.0;
+        
+        let result_c = aoc::intcode_computer::run_program(state_c, vec![result_b.2[0]], vec![]);
+        state_c = result_c.0;
+        
+        let result_d = aoc::intcode_computer::run_program(state_d, vec![result_c.2[0]], vec![]);
+        state_d = result_d.0;
+        
+        let result_e = aoc::intcode_computer::run_program(state_e, vec![result_d.2[0]], vec![]);
+        state_e = result_e.0;
+
+        input_a = result_e.2[0];
+
     }
     input_a
 }
@@ -102,9 +116,7 @@ fn part_two(program: &Vec<i64>) -> i64 {
     
     let mut max_thrust = 0;
     for p in perms {
-        println!("{:?}", p);
         max_thrust = cmp::max(max_thrust, get_thrust_with_feedback(program, p));
-        break;
     }
 
     max_thrust
