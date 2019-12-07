@@ -84,7 +84,6 @@ fn get_value(program: &Vec<i64>, index: usize, mode: usize) -> i64 {
 }
 
 pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut outputs: Vec<i64>) -> (ProgramState,Vec<i64>,Vec<i64>) {
-    // println!("A inputs: {:?} outputs: {:?}", inputs, outputs);
     let mut i = program_state.pc;
     let mut program = program_state.mem;
 
@@ -116,7 +115,6 @@ pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut ou
                 i += 2;
             }
             4 => {
-                // println!("push idx: {} val: {}", program[i+1], program[program[i+1] as usize]);
                 outputs.push(program[program[i+1] as usize]);
                 i += 2;
             },
@@ -166,9 +164,6 @@ pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut ou
         }
     }
     program_state.mem = program;
-    // program_state.pc = i;
-    assert_eq!(1, outputs.len());
-    assert_eq!(0, inputs.len());
-    // println!("B inputs: {:?} outputs: {:?}", inputs, outputs);
+    program_state.pc = i;
     (program_state, inputs, outputs)
 }
