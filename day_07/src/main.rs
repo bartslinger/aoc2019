@@ -1,4 +1,3 @@
-use std::cmp;
 use itertools::Itertools;
 
 #[cfg(test)]
@@ -54,81 +53,34 @@ fn get_thrust(program: &Vec<i64>, seq: Vec<i64>) -> i64 {
 
 fn get_thrust_with_feedback(program: &Vec<i64>, seq: Vec<i64>) -> i64 {
     let clean_state = aoc::intcode_computer::ProgramState {mem: program.clone(), pc: 0, halted: false};
-    let mut state_a = clean_state.clone();
-    let mut state_b = clean_state.clone();
-    let mut state_c = clean_state.clone();
-    let mut state_d = clean_state.clone();
-    let mut state_e = clean_state.clone();
+    let mut amp_a = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[0]], vec![]);
+    let mut amp_b = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[1]], vec![]);
+    let mut amp_c = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[2]], vec![]);
+    let mut amp_d = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[3]], vec![]);
+    let mut amp_e = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[4]], vec![]);
 
     let mut input_a = 0;
-    let result_a = aoc::intcode_computer::run_program(state_a, vec![seq[0],input_a], vec![]);
-    state_a = result_a.0;
-
-    let result_b = aoc::intcode_computer::run_program(state_b, vec![seq[1],result_a.2[0]], vec![]);
-    state_b = result_b.0;
-    
-    let result_c = aoc::intcode_computer::run_program(state_c, vec![seq[2],result_b.2[0]], vec![]);
-    state_c = result_c.0;
-    
-    let result_d = aoc::intcode_computer::run_program(state_d, vec![seq[3],result_c.2[0]], vec![]);
-    state_d = result_d.0;
-    
-    let result_e = aoc::intcode_computer::run_program(state_e, vec![seq[4],result_d.2[0]], vec![]);
-    state_e = result_e.0;
-    input_a = result_e.2[0];
 
     loop {
-
-        if state_a.halted &&
-            state_b.halted &&
-            state_c.halted &&
-            state_d.halted &&
-            state_e.halted
-        {
+        if amp_a.0.halted && amp_b.0.halted && amp_c.0.halted && amp_d.0.halted && amp_e.0.halted {
             break;
         }
-
-        let result_a = aoc::intcode_computer::run_program(state_a, vec![input_a], vec![]);
-        state_a = result_a.0;
-
-        let result_b = aoc::intcode_computer::run_program(state_b, vec![result_a.2[0]], vec![]);
-        state_b = result_b.0;
-        
-        let result_c = aoc::intcode_computer::run_program(state_c, vec![result_b.2[0]], vec![]);
-        state_c = result_c.0;
-        
-        let result_d = aoc::intcode_computer::run_program(state_d, vec![result_c.2[0]], vec![]);
-        state_d = result_d.0;
-        
-        let result_e = aoc::intcode_computer::run_program(state_e, vec![result_d.2[0]], vec![]);
-        state_e = result_e.0;
-
-        input_a = result_e.2[0];
-
+        amp_a = aoc::intcode_computer::run_program(amp_a.0, vec![input_a], vec![]);
+        amp_b = aoc::intcode_computer::run_program(amp_b.0, vec![amp_a.2[0]], vec![]);
+        amp_c = aoc::intcode_computer::run_program(amp_c.0, vec![amp_b.2[0]], vec![]);
+        amp_d = aoc::intcode_computer::run_program(amp_d.0, vec![amp_c.2[0]], vec![]);
+        amp_e = aoc::intcode_computer::run_program(amp_e.0, vec![amp_d.2[0]], vec![]);
+        input_a = amp_e.2[0];
     }
     input_a
 }
 
 fn part_one(program: &Vec<i64>) -> i64 {
-    let perms = (0..=4).permutations(5);
-    
-    let mut max_thrust = 0;
-    for p in perms {
-        max_thrust = cmp::max(max_thrust, get_thrust(program, p));
-    }
-
-    max_thrust
+    (0..=4).permutations(5).map(|p| get_thrust(program, p)).max().unwrap()
 }
 
 fn part_two(program: &Vec<i64>) -> i64 {
-    let perms = (5..=9).permutations(5);
-    
-    let mut max_thrust = 0;
-    for p in perms {
-        max_thrust = cmp::max(max_thrust, get_thrust_with_feedback(program, p));
-    }
-
-    max_thrust
+    (5..=9).permutations(5).map(|p| get_thrust_with_feedback(program, p)).max().unwrap()
 }
 
 fn main() {
