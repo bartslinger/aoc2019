@@ -3,7 +3,7 @@ use itertools::Itertools;
 
 #[cfg(test)]
 mod tests {
-    use super::{get_thrust, get_thrust_with_feedback};
+    use super::*;
 
     #[test]
     fn test_amplifiers() {
@@ -29,6 +29,15 @@ mod tests {
         -5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,
         53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10];
         assert_eq!(18216, get_thrust_with_feedback(&program, vec![9,7,8,5,6]));
+    }
+
+    #[test]
+    fn test_puzzle_answers() {
+        let original_program = aoc::vector_from_comma_separated_file::<i64>("data/input")
+        .expect("Error getting program");
+
+        assert_eq!(366376, part_one(&original_program));
+        assert_eq!(21596786, part_two(&original_program));
     }
 }
 
