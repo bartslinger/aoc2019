@@ -1,13 +1,24 @@
 #[cfg(test)]
 mod tests {
-    use super::{run_program, get_opcode, get_parameter_mode};
+    use super::*;
 
     #[test]
     fn test_run_program() {
-        assert_eq!((vec![2,0,0,0,99], vec![], vec![]), run_program(vec![1,0,0,0,99], vec![], vec![]));
-        assert_eq!((vec![2,3,0,6,99], vec![], vec![]), run_program(vec![2,3,0,3,99], vec![], vec![]));
-        assert_eq!((vec![2,4,4,5,99,9801], vec![], vec![]), run_program(vec![2,4,4,5,99,0], vec![], vec![]));
-        assert_eq!((vec![30,1,1,4,2,5,6,0,99], vec![], vec![]), run_program(vec![1,1,1,4,99,5,6,0,99], vec![], vec![]));
+        let program_state = ProgramState{mem: vec![1,0,0,0,99], pc: 0, halted: false};
+        let result = run_program(program_state, vec![], vec![]);
+        assert_eq!(vec![2,0,0,0,99], result.0.mem);
+
+        let program_state = ProgramState{mem: vec![2,3,0,3,99], pc: 0, halted: false};
+        let result = run_program(program_state, vec![], vec![]);
+        assert_eq!(vec![2,3,0,6,99], result.0.mem);
+
+        let program_state = ProgramState{mem: vec![2,4,4,5,99,0], pc: 0, halted: false};
+        let result = run_program(program_state, vec![], vec![]);
+        assert_eq!(vec![2,4,4,5,99,9801], result.0.mem);
+
+        let program_state = ProgramState{mem: vec![1,1,1,4,99,5,6,0,99], pc: 0, halted: false};
+        let result = run_program(program_state, vec![], vec![]);
+        assert_eq!(vec![30,1,1,4,2,5,6,0,99], result.0.mem);
     }
 
     #[test]
@@ -30,14 +41,29 @@ mod tests {
 
     #[test]
     fn test_run_program_with_immediate_mode() {
-        assert_eq!((vec![1002,4,3,4,99], vec![], vec![]), run_program(vec![1002,4,3,4,33], vec![], vec![]));
-        assert_eq!((vec![1101,100,-1,4,99], vec![], vec![]), run_program(vec![1101,100,-1,4,0], vec![], vec![]));
+        let program_state = ProgramState{mem: vec![1002,4,3,4,33], pc: 0, halted: false};
+        let result = run_program(program_state, vec![], vec![]);
+        assert_eq!(vec![1002,4,3,4,99], result.0.mem);
+
+        let program_state = ProgramState{mem: vec![1101,100,-1,4,0], pc: 0, halted: false};
+        let result = run_program(program_state, vec![], vec![]);
+        assert_eq!(vec![1101,100,-1,4,99], result.0.mem);
     }
 
     #[test]
     fn test_run_program_with_input_output() {
-        assert_eq!((vec![43,0,4,0,99], vec![], vec![43]), run_program(vec![3,0,4,0,99], vec![43], vec![]));
+        let program_state = ProgramState{mem: vec![3,0,4,0,99], pc: 0, halted: false};
+        let result = run_program(program_state, vec![43], vec![]);
+        assert_eq!(vec![43,0,4,0,99], result.0.mem);
+        assert_eq!(vec![43], result.2);
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct ProgramState {
+    pub mem: Vec<i64>,
+    pub pc: usize,
+    pub halted: bool
 }
 
 fn get_opcode(instruction: i64) -> i64 {
@@ -57,10 +83,13 @@ fn get_value(program: &Vec<i64>, index: usize, mode: usize) -> i64 {
     }
 }
 
-pub fn run_program(mut program: Vec<i64>, mut inputs: Vec<i64>, mut outputs: Vec<i64>) -> (Vec<i64>,Vec<i64>,Vec<i64>) {
-    let mut i = 0;
+pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut outputs: Vec<i64>) -> (ProgramState,Vec<i64>,Vec<i64>) {
+    // println!("A inputs: {:?} outputs: {:?}", inputs, outputs);
+    let mut i = program_state.pc;
+    let mut program = program_state.mem;
 
-    loop {
+
+    while !program_state.halted {
         let instruction = program[i];
         match get_opcode(instruction) {
             1 => {
@@ -78,11 +107,16 @@ pub fn run_program(mut program: Vec<i64>, mut inputs: Vec<i64>, mut outputs: Vec
                 i += 4;
             },
             3 => {
+                if inputs.len() == 0 {
+                    // Pause if an input is needed
+                    break;
+                }
                 let mut_i = program[i+1] as usize;
                 program[mut_i] = inputs.remove(0);
                 i += 2;
             }
             4 => {
+                // println!("push idx: {} val: {}", program[i+1], program[program[i+1] as usize]);
                 outputs.push(program[program[i+1] as usize]);
                 i += 2;
             },
@@ -124,9 +158,17 @@ pub fn run_program(mut program: Vec<i64>, mut inputs: Vec<i64>, mut outputs: Vec
                 }
                 i += 4;
             }
-            99 => break,
+            99 => {
+                program_state.halted = true;
+                break;
+            },
             _ => panic!("Invalid opcode")
         }
     }
-    (program, inputs, outputs)
+    program_state.mem = program;
+    // program_state.pc = i;
+    assert_eq!(1, outputs.len());
+    assert_eq!(0, inputs.len());
+    // println!("B inputs: {:?} outputs: {:?}", inputs, outputs);
+    (program_state, inputs, outputs)
 }
