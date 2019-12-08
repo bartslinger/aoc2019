@@ -31,23 +31,22 @@ fn part_one(input: &str, width: usize, height: usize) -> usize {
         .product()
 }
 
+fn pixel_value((image, layer):(&char,&char)) -> char {
+    if *image=='2' {
+        match *layer {
+            '0' => ' ',
+            '1' => '#',
+            _ => *layer
+        }
+    } else {
+        *image
+    }
+}
+
 fn part_two(input: &str, width: usize, height: usize) {
     let size = width * height;
     let charvec: Vec<char> = input.chars().collect();
     let layers: Vec<&[char]> = charvec.chunks(size).collect();
-
-    // Closure to produce new pixel value
-    let pixel_value = |x:(&char,&char)| -> char {
-        if *x.0=='2' {
-            match *x.1 {
-                '0' => ' ',
-                '1' => '#',
-                _ => *x.1
-            }
-        } else {
-            *x.0
-        }
-    };
 
     let image: Vec<char> = layers.iter().fold(
         vec!['2'; size],
