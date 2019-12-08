@@ -13,24 +13,12 @@ mod tests {
 
 fn part_one(input: &str, width: usize, height: usize) -> usize {
     let size = width * height;
+    let charvec: Vec<char> = input.chars().collect();
+    let layers: Vec<&[char]> = charvec.chunks(size).collect();
 
-    let chars: Vec<char> = input.chars().collect();
-    let chunks: Vec<_> = chars.chunks(size)
-                        .map(|ch| (ch, ch.iter().filter(|&ch| *ch=='0').count()))
-                        .collect();
+    let layer_with_least_zeros = layers.iter().min_by_key(|layer| layer.iter().filter(|&ch| *ch=='0').count()).unwrap();
 
-    // Can't figure out yet how to get the answer completely from iterators
-    let mut best_chunk = chunks[0].0;
-    let mut best_zerocount = chunks[0].1;
-    for (chunk,zerocount) in chunks {
-        if zerocount < best_zerocount {
-            best_zerocount = zerocount;
-            best_chunk = chunk;
-        }
-    }
-    let ones = best_chunk.iter().filter(|&x| *x == '1').count();
-    let twos = best_chunk.iter().filter(|&x| *x == '2').count();
-    ones * twos
+    ['1', '2'].iter().map(|s| layer_with_least_zeros.iter().filter(|&c| *c==*s).count()).product()
 }
 
 fn part_two(input: &str, width: usize, height: usize) {
