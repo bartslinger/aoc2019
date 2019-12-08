@@ -15,7 +15,6 @@ fn part_one(input: &str, width: usize, height: usize) -> usize {
     let size = width * height;
     let charvec: Vec<char> = input.chars().collect();
     let layers: Vec<&[char]> = charvec.chunks(size).collect();
-
     let layer_with_least_zeros = layers.iter().min_by_key(|layer| layer.iter().filter(|&ch| *ch=='0').count()).unwrap();
 
     ['1', '2'].iter().map(|s| layer_with_least_zeros.iter().filter(|&c| *c==*s).count()).product()
@@ -24,42 +23,30 @@ fn part_one(input: &str, width: usize, height: usize) -> usize {
 fn part_two(input: &str, width: usize, height: usize) {
     let size = width * height;
 
-    let chars: Vec<char> = input.chars().collect();
-    let chunks: Vec<Vec<char>> = chars.chunks(size).map(|x| x.to_vec()).collect();
+    let charvec: Vec<char> = input.chars().collect();
+    let layers: Vec<&[char]> = charvec.chunks(size).collect();
 
-    // turn into layers
-    let mut layers = Vec::new();
-    for c in chunks {
-        // split in rows and columns
-        let layer: Vec<_> = c.chunks(width).map(|x| x.to_vec()).collect();
-        layers.push(layer);
-    }
-
-    // Initialize transparent image
-    let mut image: Vec<Vec<char>> = Vec::new();
-    for _ in 0..height {
-        image.push(vec!['2';width]);
-    }
-
-    // Aaarghh so many nested for loops
-    for layer in &layers {
-        for i in 0..height {
-            for j in 0..width {
-                if image[i][j] == '2' && layer[i][j] != '2' {
-                    image[i][j] = match layer[i][j] {
-                        '1' => '#',
-                        '0' => ' ',
-                        _ => 'x'
-                    };
-                }
+    let pixel_value = |x:(&char,&char)| -> char {
+        if *x.0=='2' {
+            match *x.1 {
+                '0' => ' ',
+                '1' => '#',
+                _ => *x.1
             }
+        } else {
+            *x.0
         }
+    };
+
+    let mut image: Vec<char> = vec!['2'; size];
+    for layer in layers {
+        // Zip the two iterators to produce single output
+        image = image.iter().zip(layer).map(|x| pixel_value(x)).collect();
     }
 
-    for line in &image {
+    for line in image.chunks(width) {
         println!("{}", line.iter().collect::<String>());
     }
-
 }
 
 fn main() {
