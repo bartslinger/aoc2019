@@ -31,30 +31,25 @@ fn part_one(input: &str, width: usize, height: usize) -> usize {
         .product()
 }
 
-fn pixel_value(image: &char, layer: &char) -> char {
-    if *image=='2' {
-        match *layer {
-            '0' => ' ',
-            '1' => '#',
-            _ => *layer
-        }
-    } else {
-        *image
-    }
-}
-
 fn part_two(input: &str, width: usize, height: usize) {
     let size = width * height;
     let charvec: Vec<char> = input.chars().collect();
     let layers: Vec<&[char]> = charvec.chunks(size).collect();
 
-    let image: Vec<char> = layers.iter().fold(
-        vec!['2'; size],
-        |im, layer| im.iter()
-            .zip(layer.iter())
-            .map(|(im_px, lay_px)| pixel_value(im_px, lay_px))
-            .collect()
-        );
+    // Iterate through pixels
+    // Start at top layer and stop if non-transparent pixel is found
+    let image = (0..size)
+        .map(|i| // pixel index
+            (0..layers.len())
+            .map(|l| layers[l][i])
+            .find(|&p| p != '2')
+            .unwrap()
+        )
+        .map(|x| match x {
+            '1' => '#',
+            _ => ' '
+        })
+        .collect::<Vec<_>>();
 
     // Visualize as string
     let output = image.chunks(width)
