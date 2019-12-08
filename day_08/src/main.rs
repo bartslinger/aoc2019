@@ -31,7 +31,7 @@ fn part_one(input: &str, width: usize, height: usize) -> usize {
         .product()
 }
 
-fn pixel_value((image, layer):(&char,&char)) -> char {
+fn pixel_value(image: &char, layer: &char) -> char {
     if *image=='2' {
         match *layer {
             '0' => ' ',
@@ -52,7 +52,7 @@ fn part_two(input: &str, width: usize, height: usize) {
         vec!['2'; size],
         |im, layer| im.iter()
             .zip(layer.iter())
-            .map(|x| pixel_value(x))
+            .map(|(im_px, lay_px)| pixel_value(im_px, lay_px))
             .collect()
         );
 
