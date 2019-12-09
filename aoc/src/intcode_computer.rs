@@ -72,7 +72,7 @@ mod tests {
         let result = run_program(program_state, vec![], vec![]);
         assert_eq!(43, result.0.rb);
 
-        let program_state = ProgramState{mem: vec![209,5,109, 10, 99,43], pc: 0, rb: 0, halted: false};
+        let program_state = ProgramState{mem: vec![9,5,109,10,99,43], pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![], vec![]);
         assert_eq!(53, result.0.rb);
 
@@ -80,9 +80,20 @@ mod tests {
 
     #[test]
     fn test_programs_with_relative_mode() {
-        let program_state = ProgramState{mem: vec![109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99], pc: 0, rb: 0, halted: false};
+        let program = extended(vec![109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]);
+        let program_state = ProgramState{mem: program, pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![], vec![]);
-        assert!(false);
+        assert_eq!(vec![109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99], result.2);
+
+        let program = extended(vec![1102,34915192,34915192,7,4,7,99,0]);
+        let program_state = ProgramState{mem: program, pc: 0, rb: 0, halted: false};
+        let result = run_program(program_state, vec![], vec![]);
+        assert_eq!(1219070632396864, result.2[0]);
+
+        let program = extended(vec![104,1125899906842624,99]);
+        let program_state = ProgramState{mem: program, pc: 0, rb: 0, halted: false};
+        let result = run_program(program_state, vec![], vec![]);
+        assert_eq!(1125899906842624, result.2[0]);
     }
 }
 
@@ -92,6 +103,12 @@ pub struct ProgramState {
     pub pc: usize,
     pub rb: usize,
     pub halted: bool
+}
+
+fn extended(mut input: Vec<i64>) -> Vec<i64> {
+    let mut more: Vec<i64> = vec![0;2000];
+    input.append(&mut more);
+    input
 }
 
 fn get_opcode(instruction: i64) -> i64 {
@@ -107,7 +124,7 @@ fn get_value(program: &Vec<i64>, index: i64, mode: usize, rb: &usize) -> i64 {
     match mode {
         0 => program[program[index as usize] as usize],
         1 => program[index as usize],
-        2 => program[program[(*rb as i64 + index) as usize] as usize],
+        2 => program[(*rb as i64 + program[index as usize]) as usize],
         _ => panic!("Invalid parameter mode")
     }
 }
@@ -142,9 +159,10 @@ pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut ou
                 let mut_i = program[(i+1) as usize] as usize;
                 program[mut_i] = inputs.remove(0);
                 i += 2;
-            }
+            },
             4 => {
-                outputs.push(program[program[(i+1) as usize] as usize]);
+                let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1), &program_state.rb);
+                outputs.push(first_value);
                 i += 2;
             },
             5 => {
