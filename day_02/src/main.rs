@@ -15,7 +15,7 @@ mod tests {
 }
 
 fn part_one(original_program: &Vec<i64>) -> i64 {
-    let mut program_state = aoc::intcode_computer::ProgramState {mem: original_program.clone(), pc: 0, halted: false};
+    let mut program_state = aoc::intcode_computer::ProgramState {mem: original_program.clone(), pc: 0, rb: 0, halted: false};
         
     program_state.mem[1] = 12;
     program_state.mem[2] = 2;
@@ -26,7 +26,7 @@ fn part_one(original_program: &Vec<i64>) -> i64 {
 fn part_two(original_program: &Vec<i64>, goal: i64) -> i64 {
     for noun in 0..100 {
         for verb in 0..100 {
-            let mut program_state = aoc::intcode_computer::ProgramState {mem: original_program.clone(), pc: 0, halted: false};
+            let mut program_state = aoc::intcode_computer::ProgramState {mem: original_program.clone(), pc: 0, rb: 0, halted: false};
             program_state.mem[1] = noun;
             program_state.mem[2] = verb;
             let output = aoc::intcode_computer::run_program(program_state, vec![], vec![]);

@@ -4,19 +4,19 @@ mod tests {
 
     #[test]
     fn test_run_program() {
-        let program_state = ProgramState{mem: vec![1,0,0,0,99], pc: 0, halted: false};
+        let program_state = ProgramState{mem: vec![1,0,0,0,99], pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![], vec![]);
         assert_eq!(vec![2,0,0,0,99], result.0.mem);
 
-        let program_state = ProgramState{mem: vec![2,3,0,3,99], pc: 0, halted: false};
+        let program_state = ProgramState{mem: vec![2,3,0,3,99], pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![], vec![]);
         assert_eq!(vec![2,3,0,6,99], result.0.mem);
 
-        let program_state = ProgramState{mem: vec![2,4,4,5,99,0], pc: 0, halted: false};
+        let program_state = ProgramState{mem: vec![2,4,4,5,99,0], pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![], vec![]);
         assert_eq!(vec![2,4,4,5,99,9801], result.0.mem);
 
-        let program_state = ProgramState{mem: vec![1,1,1,4,99,5,6,0,99], pc: 0, halted: false};
+        let program_state = ProgramState{mem: vec![1,1,1,4,99,5,6,0,99], pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![], vec![]);
         assert_eq!(vec![30,1,1,4,2,5,6,0,99], result.0.mem);
     }
@@ -37,25 +37,35 @@ mod tests {
         assert_eq!(1, get_parameter_mode(10102, 1));
         assert_eq!(0, get_parameter_mode(10102, 2));
         assert_eq!(1, get_parameter_mode(10102, 3));
+        // Add some relative mode checks
+        assert_eq!(2, get_parameter_mode(20202, 1));
+        assert_eq!(0, get_parameter_mode(20202, 2));
+        assert_eq!(2, get_parameter_mode(20202, 3));
     }
 
     #[test]
     fn test_run_program_with_immediate_mode() {
-        let program_state = ProgramState{mem: vec![1002,4,3,4,33], pc: 0, halted: false};
+        let program_state = ProgramState{mem: vec![1002,4,3,4,33], pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![], vec![]);
         assert_eq!(vec![1002,4,3,4,99], result.0.mem);
 
-        let program_state = ProgramState{mem: vec![1101,100,-1,4,0], pc: 0, halted: false};
+        let program_state = ProgramState{mem: vec![1101,100,-1,4,0], pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![], vec![]);
         assert_eq!(vec![1101,100,-1,4,99], result.0.mem);
     }
 
     #[test]
     fn test_run_program_with_input_output() {
-        let program_state = ProgramState{mem: vec![3,0,4,0,99], pc: 0, halted: false};
+        let program_state = ProgramState{mem: vec![3,0,4,0,99], pc: 0, rb: 0, halted: false};
         let result = run_program(program_state, vec![43], vec![]);
         assert_eq!(vec![43,0,4,0,99], result.0.mem);
         assert_eq!(vec![43], result.2);
+    }
+
+    #[test]
+    fn test_programs_with_relative_mode() {
+        let program_state = ProgramState{mem: vec![109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99], pc: 0, rb: 0, halted: false};
+        assert!(true);
     }
 }
 
@@ -63,6 +73,7 @@ mod tests {
 pub struct ProgramState {
     pub mem: Vec<i64>,
     pub pc: usize,
+    pub rb: usize,
     pub halted: bool
 }
 

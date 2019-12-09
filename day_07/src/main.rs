@@ -42,7 +42,7 @@ mod tests {
 
 fn get_thrust(program: &Vec<i64>, seq: Vec<i64>) -> i64 {
 
-    let clean_state = aoc::intcode_computer::ProgramState {mem: program.clone(), pc: 0, halted: false};
+    let clean_state = aoc::intcode_computer::ProgramState {mem: program.clone(), pc: 0, rb: 0, halted: false};
     let result_a = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[0],0], vec![]);
     let result_b = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[1],result_a.2[0]], vec![]);
     let result_c = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[2],result_b.2[0]], vec![]);
@@ -52,7 +52,7 @@ fn get_thrust(program: &Vec<i64>, seq: Vec<i64>) -> i64 {
 }
 
 fn get_thrust_with_feedback(program: &Vec<i64>, seq: Vec<i64>) -> i64 {
-    let clean_state = aoc::intcode_computer::ProgramState {mem: program.clone(), pc: 0, halted: false};
+    let clean_state = aoc::intcode_computer::ProgramState {mem: program.clone(), pc: 0, rb: 0, halted: false};
     let mut amp_a = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[0]], vec![]);
     let mut amp_b = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[1]], vec![]);
     let mut amp_c = aoc::intcode_computer::run_program(clean_state.clone(), vec![seq[2]], vec![]);
