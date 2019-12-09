@@ -105,7 +105,7 @@ pub struct ProgramState {
     pub halted: bool
 }
 
-fn extended(mut input: Vec<i64>) -> Vec<i64> {
+pub fn extended(mut input: Vec<i64>) -> Vec<i64> {
     let mut more: Vec<i64> = vec![0;2000];
     input.append(&mut more);
     input
@@ -138,14 +138,28 @@ pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut ou
         let instruction = program[i as usize];
         match get_opcode(instruction) {
             1 => {
-                let mut_i = program[(i+3) as usize] as usize;
+                let mut_i = match get_parameter_mode(instruction, 3) {
+                    2 => {
+                        (program_state.rb as i64 + program[(i+3) as usize]) as usize
+                    },
+                    _ => {
+                        program[(i+3) as usize] as usize
+                    }
+                };
                 let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1), &program_state.rb);
                 let second_value = get_value(&program, i+2, get_parameter_mode(instruction, 2), &program_state.rb);
                 program[mut_i] = first_value + second_value;
                 i += 4;
             },
             2 => {
-                let mut_i = program[(i+3) as usize] as usize;
+                let mut_i = match get_parameter_mode(instruction, 3) {
+                    2 => {
+                        (program_state.rb as i64 + program[(i+3) as usize]) as usize
+                    },
+                    _ => {
+                        program[(i+3) as usize] as usize
+                    }
+                };
                 let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1), &program_state.rb);
                 let second_value = get_value(&program, i+2, get_parameter_mode(instruction, 2), &program_state.rb);
                 program[mut_i] = first_value * second_value;
@@ -156,8 +170,16 @@ pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut ou
                     // Pause if an input is needed
                     break;
                 }
-                let mut_i = program[(i+1) as usize] as usize;
-                program[mut_i] = inputs.remove(0);
+                match get_parameter_mode(instruction, 1) {
+                    2 => {
+                        let mut_i = (program_state.rb as i64 + program[(i+1) as usize]) as usize;
+                        program[mut_i] = inputs.remove(0);
+                    },
+                    _ => {
+                        let mut_i = program[(i+1) as usize] as usize;
+                        program[mut_i] = inputs.remove(0);
+                    }
+                }
                 i += 2;
             },
             4 => {
@@ -182,7 +204,14 @@ pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut ou
                 }
             },
             7 => {
-                let mut_i = program[(i+3) as usize] as usize;
+                let mut_i = match get_parameter_mode(instruction, 3) {
+                    2 => {
+                        (program_state.rb as i64 + program[(i+3) as usize]) as usize
+                    },
+                    _ => {
+                        program[(i+3) as usize] as usize
+                    }
+                };
                 let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1), &program_state.rb);
                 let second_value = get_value(&program, i+2, get_parameter_mode(instruction, 2), &program_state.rb);
                 if first_value < second_value {
@@ -193,7 +222,14 @@ pub fn run_program(mut program_state: ProgramState, mut inputs: Vec<i64>, mut ou
                 i += 4;
             },
             8 => {
-                let mut_i = program[(i+3) as usize] as usize;
+                let mut_i = match get_parameter_mode(instruction, 3) {
+                    2 => {
+                        (program_state.rb as i64 + program[(i+3) as usize]) as usize
+                    },
+                    _ => {
+                        program[(i+3) as usize] as usize
+                    }
+                };
                 let first_value = get_value(&program, i+1, get_parameter_mode(instruction, 1), &program_state.rb);
                 let second_value = get_value(&program, i+2, get_parameter_mode(instruction, 2), &program_state.rb);
                 if first_value == second_value {
