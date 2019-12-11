@@ -219,16 +219,9 @@ fn super_sick_laser_vaporation_order(location: (i64,i64), asteroids: &HashSet<(i
 }
 
 fn find_best_location(asteroids: &HashSet<(i64,i64)>) -> ((i64,i64),i64) {
-    let mut max = 0;
-    let mut best_location = (-1,-1);
-    for a in asteroids {
-        let cnt = get_visible_asteroids(*a, &asteroids).len() as i64;
-        if cnt > max {
-            best_location = *a;
-            max = cnt;
-        }
-    }
-    (best_location,max)
+    asteroids.iter()
+        .map(|a| (*a, get_visible_asteroids(*a, asteroids).len() as i64))
+        .max_by_key(|&x| x.1).unwrap()
 }
 
 fn get_asteroid_map(input: &str) -> HashSet<(i64, i64)> {
